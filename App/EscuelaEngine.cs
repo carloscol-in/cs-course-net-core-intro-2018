@@ -24,7 +24,72 @@ namespace CoreEscuela
             CargarAsignaturas();
             CargarEvaluaciones();
 
+            var listaObjsEscuela = GetObjetosEscuela();
         }
+
+        public Dictionary<LlaveDiccionario, IEnumerable<ObjetoEscuelaBase>> GetDiccionarioObjetos()
+        {
+            Dictionary<LlaveDiccionario, IEnumerable<ObjetoEscuelaBase>> diccionario = new Dictionary<LlaveDiccionario, IEnumerable<ObjetoEscuelaBase>>();
+
+            diccionario.Add(LlaveDiccionario.ESCUELA, new[] { Escuela });
+            diccionario.Add(LlaveDiccionario.CURSOS, Escuela.Cursos.Cast<ObjetoEscuelaBase>());
+
+            List<Alumno> alumnos = new List<Alumno>();
+            List<Asignatura> asignaturas = new List<Asignatura>();
+            List<Evaluacion> evaluaciones = new List<Evaluacion>();
+
+            foreach (var curso in Escuela.Cursos)
+            {
+                alumnos.AddRange(curso.Alumnos.ToList());
+                asignaturas.AddRange(curso.Asignaturas.ToList());
+
+                foreach (var alumno in curso.Alumnos)
+                {
+                    evaluaciones.AddRange(alumno.Evaluaciones.ToList());
+                }
+            }
+
+            diccionario.Add(LlaveDiccionario.ALUMNOS, alumnos);
+            diccionario.Add(LlaveDiccionario.ASIGNATURAS, asignaturas);
+            diccionario.Add(LlaveDiccionario.EVALUACIONES, evaluaciones);
+
+            return diccionario;
+        }
+
+        public IReadOnlyList<ObjetoEscuelaBase> GetObjetosEscuela(
+            bool traeEvaluaciones = true,
+            bool traeAlumnos = true,
+            bool traeAsignaturas = true,
+            bool traeCursos = true)
+        {
+            var listaObj = new List<ObjetoEscuelaBase>();
+
+            listaObj.Add(Escuela);
+
+            if (traeCursos)
+                listaObj.AddRange(Escuela.Cursos);
+
+            foreach (var curso in Escuela.Cursos)
+            {
+                if (traeAsignaturas)
+                    listaObj.AddRange(curso.Asignaturas);
+
+                if (traeAlumnos)
+                    listaObj.AddRange(curso.Alumnos);
+
+                if (traeEvaluaciones)
+                {
+                    foreach (var alumno in curso.Alumnos)
+                    {
+                        listaObj.AddRange(alumno.Evaluaciones);
+                    }
+                }
+            }
+
+            return listaObj.AsReadOnly();
+        }
+
+        #region Metodos de Carga
 
         private void CargarEvaluaciones()
         {
@@ -98,5 +163,7 @@ namespace CoreEscuela
                 c.Alumnos = GenerarAlumnosAlAzar(cantRandom);
             }
         }
+
+        #endregion
     }
 }

@@ -1,9 +1,10 @@
-using System;
+using static System.Console;
 using System.Collections.Generic;
+using CoreEscuela.Util;
 
 namespace CoreEscuela.Entidades
 {
-    public class Escuela : ObjetoEscuelaBase
+    public class Escuela : ObjetoEscuelaBase, ILugar
     {
         public int AñoDeCreación { get; set; }
 
@@ -11,6 +12,7 @@ namespace CoreEscuela.Entidades
         public string Ciudad { get; set; }
         public TiposEscuela TipoEscuela { get; set; }
         public List<Curso> Cursos { get; set; }
+        public string Direccion { get; set; }
 
         public Escuela(string nombre, int año) => (Nombre, AñoDeCreación) = (nombre, año);
 
@@ -26,6 +28,18 @@ namespace CoreEscuela.Entidades
         public override string ToString()
         {
             return $"Nombre: \"{Nombre}\", Tipo: {TipoEscuela} {System.Environment.NewLine} Pais: {Pais}, Ciudad:{Ciudad}";
+        }
+
+        public void LimpiarLugar()
+        {
+            Printer.DrawLine();
+            WriteLine("Limpiando Escuela...");
+
+            foreach (var curso in Cursos)
+            {
+                curso.LimpiarLugar();
+            }
+            WriteLine($"Escuela {Nombre} limpia");
         }
     }
 }
