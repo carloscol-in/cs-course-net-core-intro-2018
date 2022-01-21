@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using CoreEscuela.Entidades;
+using CoreEscuela.Util;
 
-namespace CoreEscuela
+namespace CoreEscuela.App
 {
     public class EscuelaEngine
     {
@@ -25,6 +26,20 @@ namespace CoreEscuela
             CargarEvaluaciones();
 
             var listaObjsEscuela = GetObjetosEscuela();
+        }
+
+        public void ImprimirDiccionario(Dictionary<LlaveDiccionario, IEnumerable<ObjetoEscuelaBase>> dict, bool imprimirEval = false)
+        {
+            foreach (var obj in dict)
+            {
+                Printer.WriteTitle(obj.Key.ToString());
+
+                foreach (var val in obj.Value)
+                {
+                    if (imprimirEval || !(val is Evaluacion))
+                        Console.WriteLine(val);
+                }
+            }
         }
 
         public Dictionary<LlaveDiccionario, IEnumerable<ObjetoEscuelaBase>> GetDiccionarioObjetos()
@@ -93,13 +108,14 @@ namespace CoreEscuela
 
         private void CargarEvaluaciones()
         {
+            var rnd = new Random();
+
             foreach (var curso in Escuela.Cursos)
             {
                 foreach (var asignatura in curso.Asignaturas)
                 {
                     foreach (var alumno in curso.Alumnos)
                     {
-                        var rnd = new Random(System.Environment.TickCount);
 
                         for (int i = 0; i < 5; i++)
                         {
@@ -107,7 +123,7 @@ namespace CoreEscuela
                             {
                                 Asignatura = asignatura,
                                 Nombre = $"{asignatura.Nombre} Ev#{i + 1}",
-                                Nota = (float)(5 * rnd.NextDouble()),
+                                Nota = (float)Math.Round(5 * rnd.NextDouble(), 2),
                                 Alumno = alumno,
                             };
 

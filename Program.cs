@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using CoreEscuela.App;
 using CoreEscuela.Entidades;
 using CoreEscuela.Util;
 using static System.Console;
@@ -10,31 +12,42 @@ namespace CoreEscuela
     {
         static void Main(string[] args)
         {
+            AppDomain.CurrentDomain.ProcessExit += AccionDelEvento;
+
             var engine = new EscuelaEngine();
             engine.Inicializar();
             Printer.WriteTitle("BIENVENIDOS A LA ESCUELA");
-            ImpimirCursosEscuela(engine.Escuela);
-            var listaObjs = engine.GetObjetosEscuela();
 
-            var listaILugar = from obj in listaObjs
-                              where obj is ILugar
-                              select (ILugar)obj;
-            // engine.Escuela.LimpiarLugar();
-            Dictionary<int, string> diccionario = new Dictionary<int, string>();
+            var reporteador = new Reporteador(engine.GetDiccionarioObjetos());
+            var evalList = reporteador.GetListaEvaluaciones();
+            var asignaturasList = reporteador.GetListaAsignaturas();
+            var dictEvaluaciones = reporteador.GetDiccionarioEvaluacionesPorAsignatura();
+            var promediosPorAsignatura = reporteador.GetAlumnosPromedioPorAsignatura();
 
+            Printer.WriteTitle("Captura de una evaluacion por Consola");
+            var eval = new Evaluacion();
+            string nombre;
+            float nota;
 
-            diccionario.Add(23, "Lorem Ipsum");
-            diccionario.Add(11, "Dolor Sit");
+            WriteLine("Ingrese el nombre de la evaluacion:");
+            nombre = ReadLine();
 
-            foreach (var keyValPair in diccionario)
-            {
-                WriteLine($"Key: {keyValPair.Key}, Value: {keyValPair.Value}");
-            }
+            if (string.IsNullOrEmpty(nombre))
+                throw new ArgumentException("El valor del nombre no puede ser nulo.");
 
-            WriteLine("Acceso a diccionario");
-            WriteLine(diccionario[23]);
+            WriteLine("Ingrese la nota de la evaluacion:");
+            bool obtuvoNota = float.TryParse(ReadLine(), out nota);
 
-            var dict = engine.GetDiccionarioObjetos();
+            if (!obtuvoNota)
+                throw new ArgumentException("El argumento de la nota fue incorrecto.");
+
+            eval.Nombre = nombre;
+            eval.Nota = nota;
+        }
+
+        private static void AccionDelEvento(object sender, EventArgs e)
+        {
+            WriteLine("SALIENDO");
         }
 
         private static void ImpimirCursosEscuela(Escuela escuela)
